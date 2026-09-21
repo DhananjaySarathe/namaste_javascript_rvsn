@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lesson-visuals.css">
 <style>
 :root{
   /* ---- Warm light (default) ---- */
@@ -368,6 +369,28 @@ body{
 ::-webkit-scrollbar-track{background:var(--bg-2)}
 ::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:9px}
 ::-webkit-scrollbar-thumb:hover{background:var(--ink-faint)}
+
+/* Detailed lesson companions */
+main a { color: var(--blue); text-underline-offset: 3px; }
+[data-theme="dark"] main a { color: #93bce8; }
+main a:focus-visible, summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 4px; }
+.guide-intro, .lesson-toc, .recall { margin: 24px 0; padding: 22px; border: 1px solid var(--line); border-radius: 12px; }
+.guide-intro p, .recall p { margin-top: 12px; }
+.lesson-toc ol { padding-left: 22px; margin-top: 12px; }
+.lesson-toc li { margin: 7px 0; }
+.guide-section { margin-top: 36px; scroll-margin-top: 85px; }
+.guide-section p + p { margin-top: 14px; }
+.video-time { display: inline-block; font-size: 12px; margin-bottom: 14px; }
+.expected-output { border-left: 3px solid var(--amber); padding: 12px 16px; margin: 14px 0; }
+.expected-output pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 8px 0 0; }
+.recall details { padding: 15px 0; border-bottom: 1px solid var(--line); }
+.recall summary { cursor: pointer; font-weight: 600; }
+.guide-reference { margin: 24px 0; font-size: 13px; }
+.table-scroll { overflow-x: auto; margin: 20px 0; }
+.study-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.study-table th, .study-table td { text-align: left; vertical-align: top; padding: 12px; border: 1px solid var(--line); }
+.study-table th { background: var(--panel-2); }
+.study-table caption { text-align: left; margin-bottom: 12px; color: var(--ink-dim); }
 </style>
 </head>
 <body>
@@ -400,715 +423,282 @@ body{
  
 const HERO = {
   title: `Namaste <span class="accent">JavaScript</span>`,
-  desc: "A complete revision deck for Akshay Saini's Season 1 & 2. Every core concept, distilled with visual execution models, plus a drill bank of 75 interview questions — 15 each across five heavy topics. Built to be the one thing you review before an interview.",
+  desc: "Study both seasons of Namaste JavaScript with detailed walkthroughs, code outputs, variations, and recall exercises. Build your foundations, trace asynchronous code, and practise with 75 interview questions.",
 };
  
 const CONTENT = [
-/* ============== SEASON 1 ============== */
-{
-  id:"ep1", num:"01", group:"Season 1 · Core", title:"How JS Works & Execution Context",
-  tag:"Foundations",
-  tldr:`Everything in JavaScript happens inside an <b>Execution Context</b>. Think of it as a sealed box with two compartments — a <b>Memory</b> component (variable environment) and a <b>Code</b> component (thread of execution).`,
-  blocks:[
-    {t:"text",h:"The mental model",b:`When a JS program runs, an <b>Execution Context (EC)</b> is created. It has two parts:
-    <ul>
-    <li><b>Memory Component</b> — a.k.a. <span class="kw">Variable Environment</span>. Stores variables & functions as key:value pairs.</li>
-    <li><b>Code Component</b> — a.k.a. <span class="kw">Thread of Execution</span>. Runs code one line at a time.</li>
-    </ul>`},
-    {t:"diagram",dt:"Execution Context",kind:"ecbox",mem:[["a","undefined"],["fn","{...}"]],code:[["Thread of","execution"],["one line","at a time"]]},
-    {t:"note",n:"key",b:`<b>JavaScript is a synchronous, single-threaded language.</b> It executes one command at a time, in a specific order. One thread = one call stack = one thing at a time.`},
-    {t:"text",h:"Why this matters",b:`Almost every other concept — hoisting, scope, closures, the event loop — is just a consequence of how this execution context is created and destroyed. Nail this and the rest falls into place.`},
-  ]
-},
-{
-  id:"ep2", num:"02", group:"Season 1 · Core", title:"How JS Code Is Executed & the Call Stack",
-  tag:"Foundations",
-  tldr:`Code runs in <b>two phases</b>. Phase 1 (Memory Creation) allocates memory to all variables & functions. Phase 2 (Code Execution) runs the code line by line. The <b>Call Stack</b> manages the order of execution contexts.`,
-  blocks:[
-    {t:"text",h:"Two-phase execution",b:`A Global Execution Context (GEC) is created in two phases:`},
-    {t:"text",h:"Phase 1 — Memory Creation",b:`JS scans the whole code and allocates memory:
-    <ul>
-    <li>Variables get <span class="kw">undefined</span> as a placeholder.</li>
-    <li>Functions get their <b>entire code</b> copied.</li>
-    </ul>`},
-    {t:"text",h:"Phase 2 — Code Execution",b:`JS runs line by line, assigning real values. When a function is <b>invoked</b>, a brand-new execution context is created for it (again with its own two phases).`},
-    {t:"code",f:"execution.js",c:`<span class="kw2">var</span> n = <span class="nm">2</span>;
-<span class="kw2">function</span> <span class="fn">square</span>(num) {
-  <span class="kw2">var</span> ans = num * num;
-  <span class="kw2">return</span> ans;
-}
-<span class="kw2">var</span> square2 = <span class="fn">square</span>(n);
-<span class="kw2">var</span> square4 = <span class="fn">square</span>(<span class="nm">4</span>);`},
-    {t:"diagram",dt:"Memory phase (before execution)",kind:"ecbox",
-      mem:[["n","undefined"],["square","{ code }"],["square2","undefined"],["square4","undefined"]],
-      code:[["waiting","..."]]},
-    {t:"text",h:"The Call Stack",b:`Every EC is pushed onto the <b>Call Stack</b>. When a function finishes, its EC is popped off. At the bottom always sits the Global EC. It's also called the Execution Context Stack, Program Stack, or Machine Stack.`},
-    {t:"diagram",dt:"Call Stack while square(n) runs",kind:"stack",
-      frames:[["gec","Global EC"],["","square() EC"]]},
-    {t:"note",n:"tip",b:`<b>Call Stack rule:</b> whatever is on top runs. It maintains the order of execution of execution contexts. When empty, the program is done.`},
-  ]
-},
-{
-  id:"ep3", num:"03", group:"Season 1 · Core", title:"Hoisting — Variables & Functions",
-  tag:"Interview Favorite",
-  tldr:`<b>Hoisting</b> is the behavior where variables and functions can be accessed <i>before</i> they're declared — because memory is allocated in Phase 1. Variables are <span class="kw">undefined</span>; function declarations are fully available.`,
-  blocks:[
-    {t:"code",f:"hoisting.js",c:`<span class="fn">getName</span>();      <span class="cm">// Namaste JS ✅ (full function hoisted)</span>
-<span class="fn">console</span>.<span class="fn">log</span>(x);  <span class="cm">// undefined ✅ (not an error!)</span>
- 
-<span class="kw2">var</span> x = <span class="nm">7</span>;
-<span class="kw2">function</span> <span class="fn">getName</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Namaste JS"</span>);
-}`},
-    {t:"text",h:"Why it works",b:`During the memory-creation phase, <span class="kw">x</span> was assigned <span class="kw">undefined</span> and <span class="kw">getName</span> got its full code. So accessing them before their line doesn't crash — that's hoisting.`},
-    {t:"note",n:"warn",b:`<b>Arrow functions & function expressions behave like variables.</b> <span class="kw">var fn = () => {}</span> is hoisted as <span class="kw">undefined</span>, so calling it early throws <b>TypeError: fn is not a function</b>.`},
-    {t:"code",f:"expression.js",c:`<span class="fn">getName</span>();  <span class="cm">// ❌ TypeError: getName is not a function</span>
-<span class="kw2">var</span> getName = <span class="kw2">function</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Hi"</span>);
-};`},
-    {t:"diagram",dt:"Memory phase — declaration vs expression",kind:"ecbox",
-      mem:[["getName (decl)","{ full code }"],["getName (expr)","undefined"]],
-      code:[["decl","callable early ✅"],["expr","TypeError ❌"]]},
-  ]
-},
-{
-  id:"ep4", num:"04", group:"Season 1 · Core", title:"Functions & Variable Environment",
-  tag:"Foundations",
-  tldr:`Each function call spins up its <b>own execution context</b> with its own memory. Same-named variables in different functions live in separate variable environments and never collide.`,
-  blocks:[
-    {t:"code",f:"varenv.js",c:`<span class="kw2">var</span> x = <span class="nm">1</span>;
-<span class="fn">a</span>();
-<span class="fn">b</span>();
-<span class="fn">console</span>.<span class="fn">log</span>(x);  <span class="cm">// 1</span>
- 
-<span class="kw2">function</span> <span class="fn">a</span>() {
-  <span class="kw2">var</span> x = <span class="nm">10</span>;
-  <span class="fn">console</span>.<span class="fn">log</span>(x);  <span class="cm">// 10</span>
-}
-<span class="kw2">function</span> <span class="fn">b</span>() {
-  <span class="kw2">var</span> x = <span class="nm">100</span>;
-  <span class="fn">console</span>.<span class="fn">log</span>(x);  <span class="cm">// 100</span>
-}`},
-    {t:"text",h:"Isolated environments",b:`Each <span class="kw">x</span> lives in a different variable environment. The call stack pushes <span class="kw">a()</span>, runs it, pops it; then <span class="kw">b()</span>; then finishes global. The global <span class="kw">x</span> is untouched.`},
-    {t:"diagram",dt:"Call stack sequence",kind:"stack",
-      frames:[["gec","Global EC (x=1)"],["","a() EC (x=10)"]]},
-    {t:"note",n:"key",b:`Order in the stack: <b>GEC → a() → pop → b() → pop → GEC finishes</b>. Each context is fully independent.`},
-  ]
-},
-{
-  id:"ep5", num:"05", group:"Season 1 · Core", title:"The Shortest Program, window & this",
-  tag:"Foundations",
-  tldr:`An <b>empty file</b> is the shortest JS program — yet JS still creates a Global EC, the <span class="kw">window</span> object, and binds <span class="kw">this</span>. At global level, <span class="kw">this === window</span> (in browsers).`,
-  blocks:[
-    {t:"text",h:"What runs on an empty file",b:`Even with zero lines, the JS engine:
-    <ul>
-    <li>Sets up a <b>Global Execution Context</b>.</li>
-    <li>Creates the <span class="kw">window</span> object (global object in browsers).</li>
-    <li>Points <span class="kw">this</span> to <span class="kw">window</span> at the global level.</li>
-    </ul>`},
-    {t:"code",f:"global.js",c:`<span class="fn">console</span>.<span class="fn">log</span>(window);        <span class="cm">// global object</span>
-<span class="fn">console</span>.<span class="fn">log</span>(<span class="kw2">this</span>);          <span class="cm">// window (global scope)</span>
-<span class="fn">console</span>.<span class="fn">log</span>(<span class="kw2">this</span> === window); <span class="cm">// true</span>
- 
-<span class="kw2">var</span> a = <span class="nm">10</span>;
-<span class="fn">console</span>.<span class="fn">log</span>(window.a);  <span class="cm">// 10</span>
-<span class="fn">console</span>.<span class="fn">log</span>(a);         <span class="cm">// 10</span>`},
-    {t:"note",n:"key",b:`Variables declared with <span class="kw">var</span> in the global scope get attached to the <span class="kw">window</span> object. <span class="kw">let</span> and <span class="kw">const</span> globals do <b>not</b> attach to window — they live in a separate script scope.`},
-    {t:"text",h:"Different environments",b:`The global object is called <span class="kw">window</span> in browsers, <span class="kw">global</span> in Node.js, and <span class="kw">globalThis</span> is the standardized name that works everywhere.`},
-  ]
-},
-{
-  id:"ep6", num:"06", group:"Season 1 · Core", title:"undefined vs not defined",
-  tag:"Interview Favorite",
-  tldr:`<span class="kw">undefined</span> = memory allocated, no value assigned yet (a placeholder). <span class="kw">not defined</span> = the variable was never declared at all → <b>ReferenceError</b>. They are not the same.`,
-  blocks:[
-    {t:"code",f:"undef.js",c:`<span class="fn">console</span>.<span class="fn">log</span>(a);  <span class="cm">// undefined (hoisted, no value)</span>
-<span class="kw2">var</span> a = <span class="nm">10</span>;
-<span class="fn">console</span>.<span class="fn">log</span>(a);  <span class="cm">// 10</span>
- 
-<span class="fn">console</span>.<span class="fn">log</span>(x);  <span class="cm">// ❌ Uncaught ReferenceError: x is not defined</span>`},
-    {t:"diagram",dt:"undefined vs not defined",kind:"ecbox",
-      mem:[["a","undefined"],["x","— (never declared)"]],
-      code:[["a","placeholder value"],["x","ReferenceError"]]},
-    {t:"note",n:"warn",b:`<b>JS is loosely (weakly) typed.</b> Never manually assign <span class="kw">undefined</span> to a variable — it defeats the purpose of the placeholder and creates confusing bugs. Use <span class="kw">null</span> if you need an intentional empty value.`},
-  ]
-},
-{
-  id:"ep7", num:"07", group:"Season 1 · Core", title:"Scope, Scope Chain & Lexical Environment",
-  tag:"Core Concept",
-  tldr:`<b>Scope</b> = where a variable is accessible. A <b>Lexical Environment</b> = local memory + reference to the parent's lexical environment. The chain of these references is the <b>Scope Chain</b>, and it's how JS resolves variables.`,
-  blocks:[
-    {t:"text",h:"Lexical = where it sits in code",b:`"Lexical" means physical location in the source. A function defined inside another function is <b>lexically</b> inside its parent — so it can reach the parent's variables.`},
-    {t:"code",f:"scope.js",c:`<span class="kw2">function</span> <span class="fn">a</span>() {
-  <span class="kw2">function</span> <span class="fn">c</span>() {
-    <span class="fn">console</span>.<span class="fn">log</span>(b);  <span class="cm">// 10 — found via scope chain</span>
-  }
-  <span class="fn">c</span>();
-}
-<span class="kw2">var</span> b = <span class="nm">10</span>;
-<span class="fn">a</span>();`},
-    {t:"text",h:"How lookup works",b:`When <span class="kw">c()</span> needs <span class="kw">b</span>: it checks its own memory → not found → checks parent <span class="kw">a()</span> → not found → checks global → found. If it reached the end and still nothing, <b>ReferenceError</b>.`},
-    {t:"diagram",dt:"Scope chain lookup",kind:"flow",
-      nodes:[["c() local","hl"],["a() lexical",""],["Global scope",""],["null",""]]},
-    {t:"note",n:"key",b:`<b>Lexical Environment = local memory + reference to lexical parent.</b> The scope chain is just this chain of references followed until the variable is found or the chain ends.`},
-  ]
-},
-{
-  id:"ep8", num:"08", group:"Season 1 · Core", title:"let, const & the Temporal Dead Zone",
-  tag:"Interview Favorite",
-  tldr:`<span class="kw">let</span> & <span class="kw">const</span> <b>are</b> hoisted — but into a separate memory space and you can't access them until initialized. That gap is the <b>Temporal Dead Zone (TDZ)</b>. Touching them there → ReferenceError.`,
-  blocks:[
-    {t:"code",f:"tdz.js",c:`<span class="fn">console</span>.<span class="fn">log</span>(a);  <span class="cm">// ❌ ReferenceError (TDZ)</span>
-<span class="fn">console</span>.<span class="fn">log</span>(b);  <span class="cm">// undefined (var)</span>
- 
-<span class="kw2">let</span> a = <span class="nm">10</span>;
-<span class="kw2">var</span> b = <span class="nm">15</span>;`},
-    {t:"text",h:"The Temporal Dead Zone",b:`The TDZ is the time between when a <span class="kw">let</span>/<span class="kw">const</span> variable is hoisted and when it's actually assigned a value. Accessing it in this window throws a ReferenceError — unlike <span class="kw">var</span>, which returns <span class="kw">undefined</span>.`},
-    {t:"diagram",dt:"var vs let/const hoisting",kind:"ecbox",
-      mem:[["b (var)","undefined → window"],["a (let)","<TDZ> separate space"]],
-      code:[["b early","undefined"],["a early","ReferenceError"]]},
-    {t:"text",h:"const is stricter",b:`<ul>
-    <li><span class="kw">let</span> — must declare, can reassign later.</li>
-    <li><span class="kw">const</span> — must declare <b>and</b> initialize on the same line; cannot reassign.</li>
-    </ul>`},
-    {t:"code",f:"consterr.js",c:`<span class="kw2">const</span> b;      <span class="cm">// ❌ SyntaxError: missing initializer</span>
-<span class="kw2">const</span> b = <span class="nm">10</span>;
-b = <span class="nm">20</span>;      <span class="cm">// ❌ TypeError: Assignment to constant variable</span>`},
-    {t:"note",n:"tip",b:`<b>Best practice:</b> prefer <span class="kw">const</span> → then <span class="kw">let</span> → avoid <span class="kw">var</span>. Declare and initialize as early as possible to shrink the TDZ to zero.`},
-  ]
-},
-{
-  id:"ep9", num:"09", group:"Season 1 · Core", title:"Block Scope & Shadowing",
-  tag:"Core Concept",
-  tldr:`A <b>block</b> <span class="kw">{ }</span> groups statements and creates block scope for <span class="kw">let</span>/<span class="kw">const</span> (not <span class="kw">var</span>). <b>Shadowing</b> is when an inner variable hides an outer one of the same name.`,
-  blocks:[
-    {t:"code",f:"block.js",c:`{
-  <span class="kw2">var</span> a = <span class="nm">10</span>;
-  <span class="kw2">let</span> b = <span class="nm">20</span>;
-  <span class="kw2">const</span> c = <span class="nm">30</span>;
-}
-<span class="fn">console</span>.<span class="fn">log</span>(a);  <span class="cm">// 10 — var leaks out</span>
-<span class="fn">console</span>.<span class="fn">log</span>(b);  <span class="cm">// ❌ ReferenceError — block scoped</span>`},
-    {t:"text",h:"Why var leaks",b:`<span class="kw">let</span> & <span class="kw">const</span> are stored in a separate <b>block scope</b> that's discarded when the block ends. <span class="kw">var</span> goes to the global/function scope, so it survives.`},
-    {t:"text",h:"Shadowing",b:`An inner declaration with the same name <b>shadows</b> the outer one within that scope.`},
-    {t:"code",f:"shadow.js",c:`<span class="kw2">let</span> a = <span class="nm">100</span>;
-{
-  <span class="kw2">let</span> a = <span class="nm">10</span>;   <span class="cm">// shadows outer a</span>
-  <span class="fn">console</span>.<span class="fn">log</span>(a);  <span class="cm">// 10</span>
-}
-<span class="fn">console</span>.<span class="fn">log</span>(a);    <span class="cm">// 100</span>`},
-    {t:"note",n:"warn",b:`<b>Illegal shadowing:</b> you cannot shadow a <span class="kw">let</span> with a <span class="kw">var</span> (<span class="kw">var</span> would cross the block boundary). But shadowing <span class="kw">var</span> with <span class="kw">let</span> is fine.`},
-  ]
-},
-/* ============== QnA + Closures block ============== */
-{
-  id:"qna", num:"QnA", group:"Season 1 · Core", title:"Diwali Special Q&A", special:true,
-  tag:"Bonus",
-  tldr:`A community Q&A recap. Key clarifications worth revising: the difference between the JS engine and the runtime, why <span class="kw">setTimeout</span> isn't part of JS itself, and how hoisting really works under the hood.`,
-  blocks:[
-    {t:"text",h:"Recurring clarifications",b:`<ul>
-    <li><b>JS engine ≠ browser.</b> Things like <span class="kw">setTimeout</span>, <span class="kw">fetch</span>, and the DOM are given by the browser (Web APIs), not the language.</li>
-    <li><b>Hoisting isn't magic.</b> It's just the memory-creation phase allocating space before execution.</li>
-    <li><b>Single-threaded</b> means one call stack, one task at a time — concurrency comes from the runtime, not extra threads.</li>
-    </ul>`},
-    {t:"note",n:"tip",b:`Treat this as a checkpoint: if any of the above surprised you, re-review episodes 1–9 before moving to closures.`},
-  ]
-},
-{
-  id:"ep10", num:"10", group:"Season 1 · Closures", title:"Closures",
-  tag:"Must Know",
-  tldr:`A <b>closure</b> is a function bundled together with references to its lexical environment. The inner function <i>remembers</i> the variables of the scope it was created in — even after the outer function has returned.`,
-  blocks:[
-    {t:"code",f:"closure.js",c:`<span class="kw2">function</span> <span class="fn">x</span>() {
-  <span class="kw2">var</span> a = <span class="nm">7</span>;
-  <span class="kw2">function</span> <span class="fn">y</span>() {
-    <span class="fn">console</span>.<span class="fn">log</span>(a);  <span class="cm">// remembers a</span>
-  }
-  <span class="kw2">return</span> y;
-}
-<span class="kw2">var</span> z = <span class="fn">x</span>();  <span class="cm">// x() is done, but...</span>
-z();          <span class="cm">// 7 ✅ — closure kept a alive</span>`},
-    {t:"text",h:"What just happened",b:`When <span class="kw">y</span> is returned, it doesn't just return the function code — it returns the function <b>together with its lexical scope</b>. So even though <span class="kw">x()</span> has finished and been popped off the stack, <span class="kw">y</span> still has access to <span class="kw">a</span>.`},
-    {t:"diagram",dt:"Closure = function + lexical env",kind:"flow",
-      nodes:[["function y()","hl"],["+ ref to a=7","hl"],["= closure",""]]},
-    {t:"text",h:"Why closures matter",b:`They power some of JS's most important patterns:
-    <ul>
-    <li>Data privacy / <b>encapsulation</b> (module pattern).</li>
-    <li><b>Currying</b> and function factories.</li>
-    <li><b>Memoization</b> and maintaining state (like <span class="kw">useState</span> in React).</li>
-    <li><span class="kw">setTimeout</span> callbacks, iterators, once-functions.</li>
-    </ul>`},
-    {t:"note",n:"warn",b:`<b>Downside:</b> closures can cause memory over-consumption — variables held by closures aren't garbage collected while the closure lives. Modern engines smartly GC unused ones.`},
-  ]
-},
-{
-  id:"ep11", num:"11", group:"Season 1 · Closures", title:"setTimeout + Closures",
-  tag:"Interview Favorite",
-  tldr:`The classic trap: a loop with <span class="kw">var</span> + <span class="kw">setTimeout</span> prints the same final value every time, because all callbacks close over the <b>same</b> shared <span class="kw">var</span>. Fix it with <span class="kw">let</span> or an IIFE.`,
-  blocks:[
-    {t:"code",f:"trap.js",c:`<span class="kw2">function</span> <span class="fn">x</span>() {
-  <span class="kw2">for</span> (<span class="kw2">var</span> i = <span class="nm">1</span>; i <= <span class="nm">5</span>; i++) {
-    <span class="fn">setTimeout</span>(<span class="kw2">function</span>() {
-      <span class="fn">console</span>.<span class="fn">log</span>(i);
-    }, i * <span class="nm">1000</span>);
-  }
-}
-<span class="fn">x</span>();  <span class="cm">// prints 6  6  6  6  6  😱</span>`},
-    {t:"text",h:"Why 6 five times",b:`<span class="kw">setTimeout</span> stores the callback and moves on immediately — it does <b>not</b> wait. By the time the callbacks fire (1s, 2s...), the loop already finished and <span class="kw">i</span> is <span class="kw">6</span>. All five callbacks share the <b>same</b> <span class="kw">i</span> reference.`},
-    {t:"text",h:"Fix 1 — use let (block scope)",b:`<span class="kw">let</span> creates a <b>new binding of <span class="kw">i</span> for each iteration</b>, so each callback closes over its own copy.`},
-    {t:"code",f:"fix-let.js",c:`<span class="kw2">for</span> (<span class="kw2">let</span> i = <span class="nm">1</span>; i <= <span class="nm">5</span>; i++) {
-  <span class="fn">setTimeout</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(i), i * <span class="nm">1000</span>);
-}
-<span class="cm">// 1  2  3  4  5 ✅</span>`},
-    {t:"text",h:"Fix 2 — keep var, wrap in a closure",b:`If you must use <span class="kw">var</span>, pass <span class="kw">i</span> into a function so each gets its own copy.`},
-    {t:"code",f:"fix-var.js",c:`<span class="kw2">for</span> (<span class="kw2">var</span> i = <span class="nm">1</span>; i <= <span class="nm">5</span>; i++) {
-  <span class="kw2">function</span> <span class="fn">close</span>(x) {
-    <span class="fn">setTimeout</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(x), x * <span class="nm">1000</span>);
-  }
-  <span class="fn">close</span>(i);  <span class="cm">// fresh copy of i each time</span>
-}`},
-    {t:"note",n:"key",b:`This is one of the <b>most asked JS interview questions</b>. Remember: <span class="kw">var</span> is function-scoped (one shared variable), <span class="kw">let</span> is block-scoped (a new one per iteration).`},
-  ]
-},
-{
-  id:"ep12", num:"12", group:"Season 1 · Closures", title:"Closures — Interview Prep",
-  tag:"Interview Favorite",
-  tldr:`Rapid-fire closure patterns interviewers love: data hiding, function factories, and the <span class="kw">once</span> pattern. The key insight is always the same — the returned function keeps its birth scope alive.`,
-  blocks:[
-    {t:"text",h:"Data hiding & encapsulation",b:`Without closures, a counter variable is global and anyone can tamper with it. With a closure, it's private.`},
-    {t:"code",f:"counter.js",c:`<span class="kw2">function</span> <span class="fn">Counter</span>() {
-  <span class="kw2">var</span> count = <span class="nm">0</span>;          <span class="cm">// private</span>
-  <span class="kw2">this</span>.incrementCounter = <span class="kw2">function</span>() {
-    count++;
-    <span class="fn">console</span>.<span class="fn">log</span>(count);
-  };
-}
-<span class="kw2">var</span> c = <span class="kw2">new</span> <span class="fn">Counter</span>();
-c.<span class="fn">incrementCounter</span>();  <span class="cm">// 1</span>
-c.<span class="fn">incrementCounter</span>();  <span class="cm">// 2</span>
-<span class="cm">// count is NOT accessible from outside ✅</span>`},
-    {t:"text",h:"Function factory (currying flavor)",b:`A function that returns functions preconfigured with remembered values.`},
-    {t:"code",f:"multiplier.js",c:`<span class="kw2">function</span> <span class="fn">multiply</span>(x) {
-  <span class="kw2">return</span> <span class="kw2">function</span>(y) {
-    <span class="kw2">return</span> x * y;   <span class="cm">// remembers x</span>
-  };
-}
-<span class="kw2">const</span> double = <span class="fn">multiply</span>(<span class="nm">2</span>);
-<span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">double</span>(<span class="nm">5</span>));  <span class="cm">// 10</span>`},
-    {t:"note",n:"tip",b:`Interview tip: whenever you're asked "how would you make a variable private in JS (pre-class)?" the answer is <b>closures</b>. Whenever you're asked "explain <span class="kw">useState</span>," closures again.`},
-    {t:"text",h:"Disadvantages to mention",b:`If asked for downsides: memory consumption (closed-over variables stay in memory), potential memory leaks if not handled, and slightly heavier scope-chain lookups.`},
-  ]
-},
-{
-  id:"party", num:"🎉", group:"Season 1 · Functions", title:"50,000 Subscribers Party", special:true,
-  tag:"Bonus",
-  tldr:`A celebration episode — no new syntax. A good moment to pause and self-test: can you explain execution context, hoisting, scope chain, and closures out loud without notes?`,
-  blocks:[
-    {t:"note",n:"key",b:`<b>Self-check before continuing:</b><ul>
-    <li>What are the two components of an execution context?</li>
-    <li>Why does <span class="kw">var</span> logging before declaration give <span class="kw">undefined</span>, not an error?</li>
-    <li>Define a closure in one sentence.</li>
-    <li>Why does the <span class="kw">setTimeout</span> loop print 6 five times?</li>
-    </ul>If you can answer all four, you're ready for functions & async.`},
-  ]
-},
-{
-  id:"ep13", num:"13", group:"Season 1 · Functions", title:"First-Class & Anonymous Functions",
-  tag:"Core Concept",
-  tldr:`In JS, functions are <b>first-class citizens</b>: they can be stored in variables, passed as arguments, and returned from other functions. An <b>anonymous function</b> is a function without a name, used where functions are treated as values.`,
-  blocks:[
-    {t:"text",h:"Statement vs Expression",b:`<ul>
-    <li><b>Function statement / declaration:</b> <span class="kw">function a() {}</span> — hoisted fully.</li>
-    <li><b>Function expression:</b> <span class="kw">var b = function() {}</span> — treated as a variable (hoisted as <span class="kw">undefined</span>).</li>
-    </ul>The only difference is hoisting.`},
-    {t:"code",f:"firstclass.js",c:`<span class="cm">// Function as a value</span>
-<span class="kw2">var</span> b = <span class="kw2">function</span>() { <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"expression"</span>); };
- 
-<span class="cm">// Anonymous function passed as an argument</span>
-<span class="fn">setTimeout</span>(<span class="kw2">function</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"anon callback"</span>);
-}, <span class="nm">1000</span>);
- 
-<span class="cm">// Named function expression</span>
-<span class="kw2">var</span> c = <span class="kw2">function</span> <span class="fn">xyz</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(xyz);  <span class="cm">// accessible only inside</span>
-};`},
-    {t:"text",h:"Parameters vs Arguments",b:`<b>Parameters</b> are the labels in the function definition. <b>Arguments</b> are the actual values you pass when calling. People mix these up constantly.`},
-    {t:"note",n:"key",b:`"First-class functions" = the <b>ability to treat functions as values</b>. This single property is what makes callbacks, HOFs, and functional programming possible in JS.`},
-  ]
-},
-{
-  id:"ep14", num:"14", group:"Season 1 · Functions", title:"Callback Functions & Event Listeners",
-  tag:"Core Concept",
-  tldr:`A <b>callback</b> is a function passed into another function to be called later. Callbacks give JS its asynchronous superpowers — but also introduce blocking risks and callback hell.`,
-  blocks:[
-    {t:"text",h:"Callbacks give async powers",b:`JS is synchronous & single-threaded, but callbacks let us do things "later" without blocking. <span class="kw">setTimeout</span> hands its callback to the browser and moves on.`},
-    {t:"code",f:"eventlistener.js",c:`<span class="kw2">const</span> btn = <span class="fn">document</span>.<span class="fn">getElementById</span>(<span class="st">"clickMe"</span>);
- 
-<span class="cm">// Closure + event listener: private counter</span>
-<span class="kw2">function</span> <span class="fn">attachHandler</span>() {
-  <span class="kw2">let</span> count = <span class="nm">0</span>;
-  btn.<span class="fn">addEventListener</span>(<span class="st">"click"</span>, <span class="kw2">function</span>() {
-    <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"clicked"</span>, ++count);  <span class="cm">// closure keeps count</span>
-  });
-}
-<span class="fn">attachHandler</span>();`},
-    {t:"text",h:"Event listeners + closures",b:`Event handlers form closures over their surrounding scope — which is how you keep per-element private state (like a click count) without globals.`},
-    {t:"note",n:"warn",b:`<b>Memory:</b> event listeners are heavy. They hold closures, which hold variables. Always <span class="kw">removeEventListener</span> when done to free memory and avoid leaks.`},
-    {t:"note",n:"key",b:`<b>Blocking the main thread:</b> since there's one call stack, a slow synchronous callback freezes the entire page. Never block the main thread.`},
-  ]
-},
-{
-  id:"ep15", num:"15", group:"Season 1 · Async", title:"Asynchronous JS & the Event Loop",
-  tag:"Must Know",
-  tldr:`The <b>call stack</b> only runs JS. The browser gives <b>Web APIs</b> (setTimeout, DOM, fetch). Completed callbacks wait in the <b>Callback (Task) Queue</b> or <b>Microtask Queue</b>; the <b>Event Loop</b> pushes them onto the stack when it's empty.`,
-  blocks:[
-    {t:"text",h:"The full picture",b:`The JS engine has just a call stack. The <b>browser</b> wraps it with superpowers via Web APIs. The Event Loop orchestrates when queued callbacks get to run.`},
-    {t:"diagram",dt:"Event loop architecture",kind:"loop",
-      micro:["Promise .then","queueMicrotask","MutationObserver"],
-      macro:["setTimeout cb","setInterval cb","DOM events"]},
-    {t:"text",h:"The golden rules",b:`<ul>
-    <li>The <b>Event Loop</b> only moves a callback to the stack when the <b>call stack is empty</b>.</li>
-    <li>The <b>Microtask Queue has higher priority</b> than the Callback/Task Queue.</li>
-    <li>All microtasks drain <b>before</b> the next macrotask runs.</li>
-    </ul>`},
-    {t:"code",f:"eventloop.js",c:`<span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Start"</span>);
-<span class="fn">setTimeout</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"setTimeout"</span>), <span class="nm">0</span>);
-<span class="fn">Promise</span>.<span class="fn">resolve</span>().<span class="fn">then</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Promise"</span>));
-<span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"End"</span>);
- 
-<span class="cm">// Output:</span>
-<span class="cm">// Start</span>
-<span class="cm">// End</span>
-<span class="cm">// Promise    ← microtask runs first!</span>
-<span class="cm">// setTimeout ← macrotask runs after</span>`},
-    {t:"note",n:"warn",b:`<b>Starvation:</b> if microtasks keep queuing more microtasks, the callback (task) queue may never get a turn. This is why a runaway promise chain can freeze timers.`},
-    {t:"text",h:"What goes where",b:`<b>Microtask queue:</b> Promise callbacks (<span class="kw">.then/.catch/.finally</span>), <span class="kw">queueMicrotask</span>, MutationObserver. <b>Callback/Task (macrotask) queue:</b> <span class="kw">setTimeout</span>, <span class="kw">setInterval</span>, DOM event callbacks.`},
-  ]
-},
-{
-  id:"ep16", num:"16", group:"Season 1 · Async", title:"JS Engine & V8 Architecture",
-  tag:"Core Concept",
-  tldr:`A JS engine (like Google's <b>V8</b>) turns your code into machine code via three steps: <b>Parsing → Compilation → Execution</b>. V8 uses an interpreter (Ignition) plus a JIT compiler (TurboFan) for speed.`,
-  blocks:[
-    {t:"text",h:"The three phases",b:`<ul>
-    <li><b>Parsing</b> — code is broken into tokens, then built into an <b>AST</b> (Abstract Syntax Tree).</li>
-    <li><b>Compilation</b> — JS uses <b>JIT (Just-In-Time)</b> compilation: interpreter + compiler working together.</li>
-    <li><b>Execution</b> — runs using the <b>Memory Heap</b> (storage) and <b>Call Stack</b> (execution), with a Garbage Collector cleaning up.</li>
-    </ul>`},
-    {t:"diagram",dt:"V8 pipeline",kind:"flow",
-      nodes:[["Source code",""],["Parser → AST",""],["Ignition (interpreter)","hl"],["TurboFan (JIT compiler)",""],["Machine code",""]]},
-    {t:"text",h:"V8's key parts",b:`<ul>
-    <li><b>Ignition</b> — the interpreter (starts fast).</li>
-    <li><b>TurboFan</b> — the optimizing JIT compiler (makes hot code fast).</li>
-    <li><b>Orinoco / Oilpan</b> — the garbage collector (mark-and-sweep).</li>
-    </ul>`},
-    {t:"note",n:"key",b:`<b>JIT = best of both worlds:</b> interpreters start executing quickly; compilers produce fast code. JIT interprets first, then compiles frequently-run ("hot") code for speed.`},
-  ]
-},
-{
-  id:"ep17", num:"17", group:"Season 1 · Async", title:"Trust Issues with setTimeout()",
-  tag:"Interview Favorite",
-  tldr:`<span class="kw">setTimeout</span> with a delay of <span class="kw">5000ms</span> does <b>not</b> guarantee it runs in exactly 5s. It runs <i>at least</i> after 5s — only once the call stack is empty. Even <span class="kw">setTimeout(fn, 0)</span> waits for the stack to clear.`,
-  blocks:[
-    {t:"code",f:"trust.js",c:`<span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Start"</span>);
-<span class="fn">setTimeout</span>(<span class="kw2">function</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Callback"</span>);
-}, <span class="nm">5000</span>);
-<span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"End"</span>);
- 
-<span class="cm">// Imagine a heavy 10s loop here blocking the stack...</span>
-<span class="cm">// The callback waits for the stack to clear FIRST,</span>
-<span class="cm">// so it may fire at ~10s, not 5s.</span>`},
-    {t:"text",h:"Why the delay isn't guaranteed",b:`The timer runs in the Web API environment. When it expires, the callback goes into the <b>callback queue</b> — but the Event Loop only moves it to the stack once the stack is <b>empty</b>. If your synchronous code is still running, the callback waits.`},
-    {t:"diagram",dt:"setTimeout journey",kind:"flow",
-      nodes:[["setTimeout()",""],["Web API timer","hl"],["Callback queue",""],["Event loop (stack empty?)",""],["Call stack",""]]},
-    {t:"text",h:"setTimeout(fn, 0)",b:`Even with 0ms delay, the callback can't jump the queue. It still goes through the Web API → callback queue → event loop. This "defers" execution until the current synchronous code finishes — a useful trick.`},
-    {t:"note",n:"warn",b:`<b>The First Rule of JS:</b> Do <b>not</b> block the main thread. A long synchronous task delays every timer, event, and render. Timers are a minimum guarantee, not an exact promise.`},
-  ]
-},
-{
-  id:"ep18", num:"18", group:"Season 1 · Functional", title:"Higher-Order Functions",
-  tag:"Interview Favorite",
-  tldr:`A <b>Higher-Order Function (HOF)</b> takes a function as an argument, returns a function, or both. This is the backbone of functional programming and of <span class="kw">map/filter/reduce</span>.`,
-  blocks:[
-    {t:"text",h:"Definition",b:`A HOF is simply a function that <b>operates on other functions</b> — receiving them as arguments or returning them. The passed-in function is the callback.`},
-    {t:"code",f:"hof.js",c:`<span class="kw2">const</span> radii = [<span class="nm">3</span>, <span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">4</span>];
- 
-<span class="cm">// Higher-order function</span>
-<span class="kw2">const</span> calculate = (radii, logic) => {
-  <span class="kw2">const</span> output = [];
-  <span class="kw2">for</span> (<span class="kw2">let</span> i = <span class="nm">0</span>; i < radii.length; i++) {
-    output.<span class="fn">push</span>(<span class="fn">logic</span>(radii[i]));
-  }
-  <span class="kw2">return</span> output;
-};
- 
-<span class="kw2">const</span> area = (r) => <span class="fn">Math</span>.PI * r * r;
-<span class="kw2">const</span> circumference = (r) => <span class="nm">2</span> * <span class="fn">Math</span>.PI * r;
- 
-<span class="fn">calculate</span>(radii, area);           <span class="cm">// reuse same HOF</span>
-<span class="fn">calculate</span>(radii, circumference);  <span class="cm">// with different logic</span>`},
-    {t:"text",h:"Why HOFs are DRY",b:`Instead of writing a separate loop for area, circumference, diameter... you write <b>one</b> HOF and swap the logic function. This is <b>abstraction</b> — the essence of functional programming. In fact, <span class="kw">calculate</span> is basically a homemade <span class="kw">map</span>.`},
-    {t:"note",n:"key",b:`Every time you use <span class="kw">map</span>, <span class="kw">filter</span>, <span class="kw">reduce</span>, <span class="kw">forEach</span>, <span class="kw">setTimeout</span>, or <span class="kw">addEventListener</span> — you're using a higher-order function.`},
-  ]
-},
-{
-  id:"ep19", num:"19", group:"Season 1 · Functional", title:"map, filter & reduce",
-  tag:"Must Know",
-  tldr:`The trio of array HOFs. <b>map</b> transforms each element. <b>filter</b> keeps elements passing a test. <b>reduce</b> boils the whole array down to a single value.`,
-  blocks:[
-    {t:"text",h:"map — transform",b:`Returns a <b>new array</b> where each element is transformed by the callback. Same length, mapped values.`},
-    {t:"code",f:"map.js",c:`<span class="kw2">const</span> arr = [<span class="nm">5</span>, <span class="nm">1</span>, <span class="nm">3</span>, <span class="nm">2</span>, <span class="nm">6</span>];
- 
-<span class="kw2">const</span> double = arr.<span class="fn">map</span>((x) => x * <span class="nm">2</span>);
-<span class="cm">// [10, 2, 6, 4, 12]</span>
- 
-<span class="kw2">const</span> binary = arr.<span class="fn">map</span>((x) => x.<span class="fn">toString</span>(<span class="nm">2</span>));
-<span class="cm">// ["101","1","11","10","110"]</span>`},
-    {t:"text",h:"filter — select",b:`Returns a <b>new array</b> with only the elements for which the callback returns <span class="kw">true</span>.`},
-    {t:"code",f:"filter.js",c:`<span class="kw2">const</span> arr = [<span class="nm">5</span>, <span class="nm">1</span>, <span class="nm">3</span>, <span class="nm">2</span>, <span class="nm">6</span>];
- 
-<span class="kw2">const</span> odds = arr.<span class="fn">filter</span>((x) => x % <span class="nm">2</span>);
-<span class="cm">// [5, 1, 3]</span>`},
-    {t:"text",h:"reduce — accumulate",b:`Reduces the array to a single value. Takes an <b>accumulator</b> and the current element; you return the new accumulator each step.`},
-    {t:"code",f:"reduce.js",c:`<span class="kw2">const</span> arr = [<span class="nm">5</span>, <span class="nm">1</span>, <span class="nm">3</span>, <span class="nm">2</span>, <span class="nm">6</span>];
- 
-<span class="cm">// sum — acc starts at 0</span>
-<span class="kw2">const</span> sum = arr.<span class="fn">reduce</span>((acc, curr) => acc + curr, <span class="nm">0</span>);
-<span class="cm">// 17</span>
- 
-<span class="cm">// max — acc starts at first element idea</span>
-<span class="kw2">const</span> max = arr.<span class="fn">reduce</span>((acc, curr) => {
-  <span class="kw2">return</span> curr > acc ? curr : acc;
-}, <span class="nm">0</span>);
-<span class="cm">// 6</span>`},
-    {t:"diagram",dt:"reduce accumulation (sum)",kind:"flow",
-      nodes:[["acc=0",""],["+5 → 5",""],["+1 → 6",""],["+3 → 9",""],["+2 → 11",""],["+6 → 17","hl"]]},
-    {t:"text",h:"Chaining them",b:`These return arrays (map/filter), so they chain beautifully. A common interview task: get full names of people under 30.`},
-    {t:"code",f:"chain.js",c:`<span class="kw2">const</span> users = [
-  { firstName: <span class="st">"Alok"</span>, age: <span class="nm">23</span> },
-  { firstName: <span class="st">"Ashish"</span>, age: <span class="nm">29</span> },
-  { firstName: <span class="st">"Ankit"</span>, age: <span class="nm">45</span> },
-];
- 
-<span class="kw2">const</span> result = users
-  .<span class="fn">filter</span>((u) => u.age < <span class="nm">30</span>)
-  .<span class="fn">map</span>((u) => u.firstName);
-<span class="cm">// ["Alok", "Ashish"]</span>
- 
-<span class="cm">// Same thing with reduce (do it in one pass):</span>
-<span class="kw2">const</span> r2 = users.<span class="fn">reduce</span>((acc, u) => {
-  <span class="kw2">if</span> (u.age < <span class="nm">30</span>) acc.<span class="fn">push</span>(u.firstName);
-  <span class="kw2">return</span> acc;
-}, []);`},
-    {t:"note",n:"tip",b:`<b>Mnemonic:</b> map = <i>same size, new shape</i>. filter = <i>same shape, fewer</i>. reduce = <i>anything → one thing</i>. Interviewers love asking you to re-implement one using another.`},
-  ]
-},
-/* ============== SEASON 2 ============== */
-{
-  id:"s2ep1", num:"S2·01", group:"Season 2 · Promises", title:"Callback Hell",
-  tag:"Core Concept",
-  tldr:`Callbacks have two big problems: <b>Callback Hell</b> (deeply nested "pyramid of doom") and <b>Inversion of Control</b> (you hand your critical logic to someone else's function and blindly trust it).`,
-  blocks:[
-    {t:"text",h:"Problem 1 — Callback Hell",b:`When each async step depends on the previous one, callbacks nest inside callbacks, growing horizontally into an unreadable pyramid.`},
-    {t:"code",f:"hell.js",c:`<span class="fn">createOrder</span>(cart, <span class="kw2">function</span>(order) {
-  <span class="fn">proceedToPayment</span>(order, <span class="kw2">function</span>(paymentInfo) {
-    <span class="fn">showOrderSummary</span>(paymentInfo, <span class="kw2">function</span>(balance) {
-      <span class="fn">updateWallet</span>(balance, <span class="kw2">function</span>() {
-        <span class="cm">// 🌋 pyramid of doom — grows sideways forever</span>
-      });
-    });
-  });
-});`},
-    {t:"text",h:"Problem 2 — Inversion of Control",b:`When you pass a callback to <span class="kw">createOrder</span>, you <b>lose control</b>. You're trusting that function to call your callback — exactly once, at the right time, without error. It might call it twice, never, or too early. That's risky for critical code like payments.`},
-    {t:"note",n:"key",b:`<b>Promises solve both:</b> they flatten nesting via chaining, and they hand <i>you</i> back a trustworthy object instead of taking your callback. You attach handlers — control stays with you.`},
-  ]
-},
-{
-  id:"s2ep2", num:"S2·02", group:"Season 2 · Promises", title:"Promises",
-  tag:"Must Know",
-  tldr:`A <b>Promise</b> is an object representing the eventual completion (or failure) of an async operation. It has three states: <b>pending → fulfilled / rejected</b>. Once settled, it's <b>immutable</b>.`,
-  blocks:[
-    {t:"text",h:"What a Promise is",b:`Instead of passing a callback in, an async function <b>returns a Promise object</b> — a placeholder for a future value. You attach <span class="kw">.then()</span> to react when it resolves.`},
-    {t:"code",f:"promise.js",c:`<span class="kw2">const</span> promise = <span class="fn">createOrder</span>(cart);
- 
-promise.<span class="fn">then</span>(<span class="kw2">function</span>(order) {
-  <span class="fn">proceedToPayment</span>(order);
-});
- 
-<span class="cm">// The promise object:</span>
-<span class="cm">// { value: undefined, state: "pending" }</span>
-<span class="cm">// → once data arrives:</span>
-<span class="cm">// { value: {...}, state: "fulfilled" }</span>`},
-    {t:"text",h:"Three states",b:`<ul>
-    <li><b>pending</b> — initial, operation not done.</li>
-    <li><b>fulfilled</b> — completed successfully (resolved).</li>
-    <li><b>rejected</b> — failed.</li>
-    </ul>A promise settles <b>once</b> and never changes again — this immutability is why it's trustworthy.`},
-    {t:"diagram",dt:"Promise lifecycle",kind:"flow",
-      nodes:[["pending","hl"],["→ fulfilled ✅",""],["OR → rejected ❌",""]]},
-    {t:"text",h:"Solving callback hell",b:`Because <span class="kw">.then()</span> returns a promise, you <b>chain</b> instead of nesting. Code grows vertically (readable) not horizontally (pyramid).`},
-    {t:"code",f:"chaining.js",c:`<span class="fn">createOrder</span>(cart)
-  .<span class="fn">then</span>((order) => <span class="fn">proceedToPayment</span>(order))
-  .<span class="fn">then</span>((paymentInfo) => <span class="fn">showSummary</span>(paymentInfo))
-  .<span class="fn">then</span>((balance) => <span class="fn">updateWallet</span>(balance));
-<span class="cm">// flat & readable ✅</span>`},
-    {t:"note",n:"warn",b:`<b>Chaining gotcha:</b> always <b>return</b> the value/promise inside each <span class="kw">.then</span>, otherwise the next <span class="kw">.then</span> won't receive it. Forgetting <span class="kw">return</span> is the #1 chaining bug.`},
-  ]
-},
-{
-  id:"s2ep3", num:"S2·03", group:"Season 2 · Promises", title:"Creating a Promise, Chaining & Error Handling",
-  tag:"Must Know",
-  tldr:`Create a promise with <span class="kw">new Promise((resolve, reject) => {})</span>. Chain with <span class="kw">.then</span>, and catch failures with <span class="kw">.catch</span>. A single <span class="kw">.catch</span> at the end handles errors from the whole chain.`,
-  blocks:[
-    {t:"code",f:"create.js",c:`<span class="kw2">function</span> <span class="fn">createOrder</span>(cart) {
-  <span class="kw2">return</span> <span class="kw2">new</span> <span class="fn">Promise</span>(<span class="kw2">function</span>(resolve, reject) {
-    <span class="kw2">if</span> (!<span class="fn">validateCart</span>(cart)) {
-      <span class="kw2">const</span> err = <span class="kw2">new</span> <span class="fn">Error</span>(<span class="st">"Cart invalid"</span>);
-      <span class="fn">reject</span>(err);      <span class="cm">// ❌ reject on failure</span>
-      <span class="kw2">return</span>;
-    }
-    <span class="kw2">const</span> orderId = <span class="st">"12345"</span>;
-    <span class="fn">resolve</span>(orderId);     <span class="cm">// ✅ resolve on success</span>
-  });
-}`},
-    {t:"text",h:"Chaining with error handling",b:`Attach a <span class="kw">.catch</span> to handle any rejection in the chain. Errors "bubble down" to the nearest <span class="kw">.catch</span>.`},
-    {t:"code",f:"errors.js",c:`<span class="fn">createOrder</span>(cart)
-  .<span class="fn">then</span>((orderId) => {
-    <span class="fn">console</span>.<span class="fn">log</span>(orderId);
-    <span class="kw2">return</span> <span class="fn">proceedToPayment</span>(orderId);
-  })
-  .<span class="fn">then</span>((paymentInfo) => <span class="fn">console</span>.<span class="fn">log</span>(paymentInfo))
-  .<span class="fn">catch</span>((err) => {
-    <span class="fn">console</span>.<span class="fn">log</span>(err.message);  <span class="cm">// catches ANY error above</span>
-  });`},
-    {t:"text",h:"Recovering mid-chain",b:`Place a <span class="kw">.catch</span> in the <b>middle</b> to handle one step's failure and let the rest of the chain continue. A <span class="kw">.catch</span> only handles errors <b>above</b> it.`},
-    {t:"code",f:"midcatch.js",c:`<span class="fn">createOrder</span>(cart)
-  .<span class="fn">then</span>((id) => <span class="fn">proceedToPayment</span>(id))
-  .<span class="fn">catch</span>((err) => <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"payment failed, but continuing"</span>))
-  .<span class="fn">then</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"this still runs ✅"</span>));`},
-    {t:"note",n:"tip",b:`<b>Rule of thumb:</b> use <span class="kw">resolve</span> for success values, <span class="kw">reject</span> for errors, one <span class="kw">.catch</span> at the end for the whole chain. Add mid-chain <span class="kw">.catch</span> only when you want to recover and continue.`},
-  ]
-},
-{
-  id:"s2ep4", num:"S2·04", group:"Season 2 · Promises", title:"async / await",
-  tag:"Must Know",
-  tldr:`<span class="kw">async</span> functions always return a Promise. <span class="kw">await</span> pauses the function until a promise settles — but it does <b>not</b> block the main thread. It's syntactic sugar over promises that reads like synchronous code.`,
-  blocks:[
-    {t:"text",h:"async basics",b:`An <span class="kw">async</span> function <b>always returns a promise</b>. If you return a plain value, JS auto-wraps it in a resolved promise.`},
-    {t:"code",f:"async.js",c:`<span class="kw2">async</span> <span class="kw2">function</span> <span class="fn">getData</span>() {
-  <span class="kw2">return</span> <span class="st">"Namaste JS"</span>;
-}
-<span class="kw2">const</span> p = <span class="fn">getData</span>();
-<span class="fn">console</span>.<span class="fn">log</span>(p);  <span class="cm">// Promise { "Namaste JS" }</span>
-p.<span class="fn">then</span>((res) => <span class="fn">console</span>.<span class="fn">log</span>(res));  <span class="cm">// "Namaste JS"</span>`},
-    {t:"text",h:"await — the key insight",b:`<span class="kw">await</span> can only be used inside an <span class="kw">async</span> function. When JS hits <span class="kw">await</span>, if the promise isn't resolved yet, the function is <b>suspended and removed from the call stack</b> — so the main thread is free. It resumes exactly where it left off once the promise settles.`},
-    {t:"code",f:"await.js",c:`<span class="kw2">const</span> p = <span class="kw2">new</span> <span class="fn">Promise</span>((res) =>
-  <span class="fn">setTimeout</span>(() => <span class="fn">res</span>(<span class="st">"done"</span>), <span class="nm">3000</span>)
-);
- 
-<span class="kw2">async</span> <span class="kw2">function</span> <span class="fn">handle</span>() {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"Start"</span>);
-  <span class="kw2">const</span> val = <span class="kw2">await</span> p;   <span class="cm">// suspends here, stack freed</span>
-  <span class="fn">console</span>.<span class="fn">log</span>(val);        <span class="cm">// resumes after 3s</span>
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"End"</span>);
-}
-<span class="fn">handle</span>();`},
-    {t:"note",n:"key",b:`<b>JS does NOT wait / block.</b> The call stack is never blocked. <span class="kw">await</span> suspends only <i>that</i> async function and pops it off the stack; it's pushed back when the promise resolves. This is the most misunderstood part — the engine keeps running everything else.`},
-    {t:"text",h:"Error handling with try/catch",b:`With async/await, use plain <span class="kw">try...catch</span> — much cleaner than <span class="kw">.catch</span> chains.`},
-    {t:"code",f:"trycatch.js",c:`<span class="kw2">async</span> <span class="kw2">function</span> <span class="fn">getData</span>() {
-  <span class="kw2">try</span> {
-    <span class="kw2">const</span> res = <span class="kw2">await</span> <span class="fn">fetch</span>(url);
-    <span class="kw2">const</span> data = <span class="kw2">await</span> res.<span class="fn">json</span>();
-    <span class="fn">console</span>.<span class="fn">log</span>(data);
-  } <span class="kw2">catch</span> (err) {
-    <span class="fn">console</span>.<span class="fn">log</span>(err);
-  }
-}`},
-    {t:"note",n:"tip",b:`<b>async/await vs .then:</b> same power, different readability. async/await is generally preferred for sequential logic; promises/.then still shine for fire-and-forget and combinators like <span class="kw">Promise.all</span>.`},
-  ]
-},
-{
-  id:"s2ep5", num:"S2·05", group:"Season 2 · Promises", title:"Promise APIs + Interview Questions",
-  tag:"Interview Favorite",
-  tldr:`Four combinators for handling multiple promises: <b>all</b> (all must succeed), <b>allSettled</b> (wait for all, whatever the outcome), <b>race</b> (first to settle wins), <b>any</b> (first to succeed wins).`,
-  blocks:[
-    {t:"text",h:"Promise.all",b:`Takes an array of promises. Resolves when <b>all</b> succeed (returns array of results). <b>Fails fast</b> — if any one rejects, the whole thing rejects immediately with that error.`},
-    {t:"code",f:"all.js",c:`<span class="fn">Promise</span>.<span class="fn">all</span>([p1, p2, p3])
-  .<span class="fn">then</span>((results) => <span class="fn">console</span>.<span class="fn">log</span>(results))  <span class="cm">// [r1, r2, r3]</span>
-  .<span class="fn">catch</span>((err) => <span class="fn">console</span>.<span class="fn">log</span>(err));       <span class="cm">// first rejection</span>
-<span class="cm">// If p2 fails at 5s, .catch fires at 5s. Others are abandoned.</span>`},
-    {t:"text",h:"Promise.allSettled",b:`The <b>safest</b>. Waits for <b>every</b> promise to settle regardless of success/failure, then returns an array of <span class="kw">{status, value/reason}</span> objects. Never short-circuits.`},
-    {t:"code",f:"allsettled.js",c:`<span class="fn">Promise</span>.<span class="fn">allSettled</span>([p1, p2, p3])
-  .<span class="fn">then</span>((results) => <span class="fn">console</span>.<span class="fn">log</span>(results));
-<span class="cm">// [</span>
-<span class="cm">//  { status: "fulfilled", value: r1 },</span>
-<span class="cm">//  { status: "rejected", reason: err2 },</span>
-<span class="cm">//  { status: "fulfilled", value: r3 }</span>
-<span class="cm">// ]</span>`},
-    {t:"text",h:"Promise.race",b:`Returns as soon as the <b>first</b> promise settles — whether it fulfills OR rejects. It's a literal race; first to finish (win or lose) wins.`},
-    {t:"code",f:"race.js",c:`<span class="cm">// p1: 3s, p2: 1s, p3: 2s</span>
-<span class="fn">Promise</span>.<span class="fn">race</span>([p1, p2, p3])
-  .<span class="fn">then</span>((res) => <span class="fn">console</span>.<span class="fn">log</span>(res));  <span class="cm">// p2's value at 1s</span>`},
-    {t:"text",h:"Promise.any",b:`Returns the first promise that <b>succeeds</b> (ignores rejections). Only if <b>all</b> fail does it reject — with an <span class="kw">AggregateError</span> containing all errors.`},
-    {t:"code",f:"any.js",c:`<span class="cm">// p1: fails 3s, p2: fails 5s, p3: succeeds 2s</span>
-<span class="fn">Promise</span>.<span class="fn">any</span>([p1, p2, p3])
-  .<span class="fn">then</span>((res) => <span class="fn">console</span>.<span class="fn">log</span>(res));  <span class="cm">// p3's value at 2s</span>
-<span class="cm">// If ALL fail → catch gets AggregateError (err.errors[])</span>`},
-    {t:"diagram",dt:"When each combinator settles",kind:"ecbox",
-      mem:[["all","all succeed / any fail"],["allSettled","all settle (never rejects)"]],
-      code:[["race","first to settle (win/lose)"],["any","first to succeed"]]},
-    {t:"note",n:"tip",b:`<b>Interview cheat:</b> <span class="kw">all</span> = "everyone or no one". <span class="kw">allSettled</span> = "tell me everything". <span class="kw">race</span> = "first across the line, dead or alive". <span class="kw">any</span> = "first winner only".`},
-  ]
-},
-{
-  id:"s2ep6", num:"S2·06", group:"Season 2 · this", title:"The this Keyword",
-  tag:"Interview Favorite",
-  tldr:`<span class="kw">this</span> depends entirely on <b>how a function is called</b>, not where it's defined. Global → window; regular function call → undefined/window (strict vs sloppy); object method → the object; arrow functions → inherit <span class="kw">this</span> from their lexical parent.`,
-  blocks:[
-    {t:"text",h:"this in different contexts",b:`<ul>
-    <li><b>Global scope:</b> <span class="kw">this</span> = global object (<span class="kw">window</span> in browser).</li>
-    <li><b>Regular function:</b> <span class="kw">undefined</span> in strict mode; <span class="kw">window</span> in non-strict (this is "this substitution").</li>
-    <li><b>Object method:</b> <span class="kw">this</span> = the object that called it.</li>
-    <li><b>Arrow function:</b> no own <span class="kw">this</span> — takes it from the enclosing lexical scope.</li>
-    </ul>`},
-    {t:"code",f:"thismethod.js",c:`<span class="kw2">const</span> obj = {
-  name: <span class="st">"Akshay"</span>,
-  regular: <span class="kw2">function</span>() {
-    <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw2">this</span>.name);  <span class="cm">// "Akshay" ✅</span>
+  {
+    "id": "ep1",
+    "num": "01",
+    "group": "Season 1 · Core",
+    "title": "How JS Works & Execution Context",
+    "tag": "Foundations",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
   },
-  arrow: () => {
-    <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw2">this</span>.name);  <span class="cm">// undefined ❌ (lexical this)</span>
+  {
+    "id": "ep2",
+    "num": "02",
+    "group": "Season 1 · Core",
+    "title": "How JS Code Is Executed & the Call Stack",
+    "tag": "Foundations",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
   },
-};
-obj.<span class="fn">regular</span>();
-obj.<span class="fn">arrow</span>();`},
-    {t:"text",h:"call, apply, bind — sharing methods",b:`These let you explicitly set <span class="kw">this</span>. <span class="kw">call</span> passes args individually, <span class="kw">apply</span> passes an array, <span class="kw">bind</span> returns a new function with <span class="kw">this</span> locked in.`},
-    {t:"code",f:"callbind.js",c:`<span class="kw2">const</span> person = { name: <span class="st">"Alok"</span> };
-<span class="kw2">function</span> <span class="fn">greet</span>(city) {
-  <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw2">this</span>.name + <span class="st">" from "</span> + city);
-}
- 
-<span class="fn">greet</span>.<span class="fn">call</span>(person, <span class="st">"Delhi"</span>);        <span class="cm">// args listed</span>
-<span class="fn">greet</span>.<span class="fn">apply</span>(person, [<span class="st">"Delhi"</span>]);      <span class="cm">// args as array</span>
-<span class="kw2">const</span> bound = <span class="fn">greet</span>.<span class="fn">bind</span>(person, <span class="st">"Delhi"</span>);
-<span class="fn">bound</span>();                            <span class="cm">// call later</span>`},
-    {t:"text",h:"this inside arrow functions",b:`Arrow functions do not bind their own <span class="kw">this</span>. They capture <span class="kw">this</span> from where they were <b>defined</b> (lexical). This is why arrows are perfect for callbacks inside methods — they keep the surrounding <span class="kw">this</span>.`},
-    {t:"code",f:"arrowthis.js",c:`<span class="kw2">const</span> obj = {
-  name: <span class="st">"Akshay"</span>,
-  values: [<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>],
-  print() {
-    <span class="cm">// arrow keeps obj's this ✅</span>
-    <span class="kw2">this</span>.values.<span class="fn">forEach</span>((v) => {
-      <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw2">this</span>.name, v);
-    });
+  {
+    "id": "ep3",
+    "num": "03",
+    "group": "Season 1 · Core",
+    "title": "Hoisting — Variables & Functions",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
   },
-};
-obj.<span class="fn">print</span>();`},
-    {t:"note",n:"key",b:`<b>Golden rule:</b> for regular functions, <span class="kw">this</span> is decided at <b>call time</b> ("who called me?"). For arrow functions, <span class="kw">this</span> is decided at <b>definition time</b> (lexical parent). This single distinction answers 90% of <span class="kw">this</span> interview questions.`},
-  ]
-},
+  {
+    "id": "ep4",
+    "num": "04",
+    "group": "Season 1 · Core",
+    "title": "Functions & Variable Environment",
+    "tag": "Foundations",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep5",
+    "num": "05",
+    "group": "Season 1 · Core",
+    "title": "The Shortest Program, window & this",
+    "tag": "Foundations",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep6",
+    "num": "06",
+    "group": "Season 1 · Core",
+    "title": "undefined vs not defined",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep7",
+    "num": "07",
+    "group": "Season 1 · Core",
+    "title": "Scope, Scope Chain & Lexical Environment",
+    "tag": "Core Concept",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep8",
+    "num": "08",
+    "group": "Season 1 · Core",
+    "title": "let, const & the Temporal Dead Zone",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep9",
+    "num": "09",
+    "group": "Season 1 · Core",
+    "title": "Block Scope & Shadowing",
+    "tag": "Core Concept",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "qna",
+    "num": "QnA",
+    "group": "Season 1 · Core",
+    "title": "Diwali Special Q&A",
+    "special": true,
+    "tag": "Bonus",
+    "tldr": "A study checkpoint alongside the community Q&A.",
+    "blocks": [
+      {
+        "t": "text",
+        "h": "Community episode",
+        "b": "<p><a href=\"https://www.youtube.com/watch?v=VIJxU2NYG-Y\" target=\"_blank\" rel=\"noopener\">Watch the Diwali Q&A ↗</a></p><p>Use this added revision checkpoint before continuing: explain an execution context, trace a scope chain, and distinguish undefined from an uninitialized lexical binding. Return to lessons 1–9 for worked examples.</p>"
+      }
+    ]
+  },
+  {
+    "id": "ep10",
+    "num": "10",
+    "group": "Season 1 · Closures",
+    "title": "Closures",
+    "tag": "Must Know",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep11",
+    "num": "11",
+    "group": "Season 1 · Closures",
+    "title": "setTimeout + Closures",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep12",
+    "num": "12",
+    "group": "Season 1 · Closures",
+    "title": "Closures — Interview Prep",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "party",
+    "num": "🎉",
+    "group": "Season 1 · Functions",
+    "title": "50,000 Subscribers Party",
+    "special": true,
+    "tag": "Bonus",
+    "tldr": "A community celebration and a moment to practise recall.",
+    "blocks": [
+      {
+        "t": "text",
+        "h": "Community episode",
+        "b": "<a href=\"https://www.youtube.com/watch?v=OJfz6ZHxqZ8\" target=\"_blank\" rel=\"noopener\">Watch the celebration ↗</a><p>The following questions are added study practice.</p>"
+      },
+      {
+        "t": "note",
+        "n": "key",
+        "b": "<b>Self-check before continuing:</b><ul>\n    <li>What are the two components of an execution context?</li>\n    <li>Why does <span class=\"kw\">var</span> logging before declaration give <span class=\"kw\">undefined</span>, not an error?</li>\n    <li>Define a closure in one sentence.</li>\n    <li>Why does the <span class=\"kw\">setTimeout</span> loop print 6 five times?</li>\n    </ul>If you can answer all four, you're ready for functions & async."
+      }
+    ]
+  },
+  {
+    "id": "ep13",
+    "num": "13",
+    "group": "Season 1 · Functions",
+    "title": "First-Class & Anonymous Functions",
+    "tag": "Core Concept",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep14",
+    "num": "14",
+    "group": "Season 1 · Functions",
+    "title": "Callback Functions & Event Listeners",
+    "tag": "Core Concept",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep15",
+    "num": "15",
+    "group": "Season 1 · Async",
+    "title": "Asynchronous JS & the Event Loop",
+    "tag": "Must Know",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep16",
+    "num": "16",
+    "group": "Season 1 · Async",
+    "title": "JS Engine & V8 Architecture",
+    "tag": "Core Concept",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep17",
+    "num": "17",
+    "group": "Season 1 · Async",
+    "title": "Trust Issues with setTimeout()",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep18",
+    "num": "18",
+    "group": "Season 1 · Functional",
+    "title": "Higher-Order Functions",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "ep19",
+    "num": "19",
+    "group": "Season 1 · Functional",
+    "title": "map, filter & reduce",
+    "tag": "Must Know",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "s2ep1",
+    "num": "S2·01",
+    "group": "Season 2 · Promises",
+    "title": "Callback Hell",
+    "tag": "Core Concept",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "s2ep2",
+    "num": "S2·02",
+    "group": "Season 2 · Promises",
+    "title": "Promises",
+    "tag": "Must Know",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "s2ep3",
+    "num": "S2·03",
+    "group": "Season 2 · Promises",
+    "title": "Creating a Promise, Chaining & Error Handling",
+    "tag": "Must Know",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "s2ep4",
+    "num": "S2·04",
+    "group": "Season 2 · Promises",
+    "title": "async / await",
+    "tag": "Must Know",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "s2ep5",
+    "num": "S2·05",
+    "group": "Season 2 · Promises",
+    "title": "Promise APIs + Interview Questions",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "s2ep6",
+    "num": "S2·06",
+    "group": "Season 2 · this",
+    "title": "The this Keyword",
+    "tag": "Interview Favorite",
+    "tldr": "Detailed explanations, worked examples, and recall practice.",
+    "blocks": []
+  },
+  {
+    "id": "s2react",
+    "num": "Bonus",
+    "group": "Season 2 · Preparation",
+    "title": "JavaScript Before React — 9 Topics",
+    "tag": "Practice roadmap",
+    "special": true,
+    "tldr": "A practical preparation guide.",
+    "blocks": []
+  }
 ];
  
 /* ============================================================
@@ -1260,7 +850,7 @@ c(); <span class="cm">// 2  — count is unreachable from outside ✅</span>` },
  
 { id:"c14", topic:"closures", diff:"normal",
   q:"How do closures relate to React's useState?",
-  a:`A component function runs and calls <span class="kw">useState</span>; the state value lives in a closure held by React, not in the component's own scope. Event handlers defined inside the component <b>close over</b> the state and setter from that render. This is also why stale-closure bugs happen — a handler can capture an old state value from a previous render.` },
+  a:`A component function runs and calls <span class="kw">useState</span>; React stores state between renders; each invocation receives a state value for that render. Event handlers defined inside the component <b>close over</b> the state and setter from that render. This is also why stale-closure bugs happen — a handler can capture an old state value from a previous render.` },
  
 { id:"c15", topic:"closures", diff:"hard",
   q:"Explain the output of this partial-application example.",
@@ -1361,7 +951,7 @@ c(); <span class="cm">// 2  — count is unreachable from outside ✅</span>` },
   a:`Only when the <b>call stack is empty</b>. On each tick, the loop checks: is the stack empty? If yes, it first drains the <b>entire microtask queue</b>, then takes <b>one</b> task from the macrotask queue and runs it. Rendering opportunities happen between macrotasks. It never interrupts running code mid-function.` },
  
 { id:"e15", topic:"eventloop", diff:"hard",
-  q:"Order these: sync log, setTimeout, Promise.then, and an async IIFE awaiting a timer.",
+  q:"Order these: sync log, setTimeout, Promise.then, and an async IIFE awaiting null.",
   setup:`<span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"sync"</span>);
 <span class="fn">setTimeout</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"timeout"</span>), <span class="nm">0</span>);
 <span class="fn">Promise</span>.<span class="fn">resolve</span>().<span class="fn">then</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">"promise"</span>));
@@ -1374,7 +964,7 @@ c(); <span class="cm">// 2  — count is unreachable from outside ✅</span>` },
 /* ---------------- PROMISES & ASYNC/AWAIT (15) ---------------- */
 { id:"p1", topic:"promises", diff:"normal",
   q:"What are the three states of a Promise, and what does 'immutable once settled' mean?",
-  a:`States: <b>pending</b> (initial), <b>fulfilled</b> (resolved with a value), <b>rejected</b> (failed with a reason). A promise settles <b>exactly once</b> — after resolving or rejecting, its state and value can never change again. This immutability is what makes promises trustworthy vs raw callbacks.` },
+  a:`States: <b>pending</b> (initial), <b>fulfilled</b> (resolved with a value), <b>rejected</b> (failed with a reason). A promise settles <b>at most once</b>; it may stay pending forever. Once fulfilled or rejected, its outcome is fixed. A fulfilled object is not frozen. Resolving with a pending promise can lock in its eventual outcome while leaving this promise pending.` },
  
 { id:"p2", topic:"promises", diff:"hard",
   q:"What's the output?",
@@ -1387,7 +977,7 @@ c(); <span class="cm">// 2  — count is unreachable from outside ✅</span>` },
  
 { id:"p3", topic:"promises", diff:"normal",
   q:"Difference between Promise.all and Promise.allSettled when one rejects?",
-  a:`<b>Promise.all fails fast</b> — the instant any promise rejects, the whole thing rejects with that error and the other results are discarded. <b>Promise.allSettled never rejects</b> — it waits for every promise to settle and returns an array of <span class="kw">{status, value|reason}</span> so you see all outcomes.` },
+  a:`<b>Promise.all fails fast</b> — the instant any promise rejects, the whole thing rejects with that error and the other results are discarded. <b>Promise.allSettled collects input rejections</b> (invalid input, such as a non-iterable, can still reject) — it waits for every promise to settle and returns an array of <span class="kw">{status, value|reason}</span> so you see all outcomes.` },
  
 { id:"p4", topic:"promises", diff:"trick",
   q:"race vs any — what's the difference on rejection?",
@@ -1401,7 +991,7 @@ c(); <span class="cm">// 2  — count is unreachable from outside ✅</span>` },
   q:"What does an async function return if you return a plain string?",
   setup:`<span class="kw2">async</span> <span class="kw2">function</span> <span class="fn">f</span>() { <span class="kw2">return</span> <span class="st">"hi"</span>; }
 <span class="kw2">const</span> r = <span class="fn">f</span>();`,
-  a:`<span class="kw">r</span> is a <b>Promise</b> resolved with <span class="st">"hi"</span> — an async function <b>always</b> returns a promise, auto-wrapping non-promise return values. Extract it with <span class="kw">r.then(v => ...)</span> or <span class="kw">await f()</span>. If you return a promise, it's passed through (not double-wrapped).` },
+  a:`<span class="kw">r</span> is a <b>Promise</b> resolved with <span class="st">"hi"</span> — an async function <b>always</b> returns a promise, auto-wrapping non-promise return values. Extract it with <span class="kw">r.then(v => ...)</span> or <span class="kw">await f()</span>. Returning a promise makes the async function’s distinct returned promise adopt its eventual outcome; they are not the same object.` },
  
 { id:"p7", topic:"promises", diff:"hard",
   q:"Sequential vs parallel awaits — what's slow here and how do you fix it?",
@@ -1450,11 +1040,11 @@ p.<span class="fn">then</span>(() => <span class="fn">console</span>.<span class
  
 { id:"p12", topic:"promises", diff:"trick",
   q:"What does Promise.all([]) (empty array) resolve to?",
-  a:`It resolves <b>immediately</b> with an empty array <span class="kw">[]</span>. Similarly <span class="kw">Promise.allSettled([])</span> → <span class="kw">[]</span>. But <span class="kw">Promise.any([])</span> <b>rejects</b> with an <span class="kw">AggregateError</span> ("All promises were rejected") since there's nothing to fulfill, and <span class="kw">Promise.race([])</span> stays <b>pending forever</b>.` },
+  a:`It is already fulfilled with an empty array <span class="kw">[]</span>. Similarly <span class="kw">Promise.allSettled([])</span> → <span class="kw">[]</span>. But <span class="kw">Promise.any([])</span> <b>rejects</b> with an <span class="kw">AggregateError</span> ("All promises were rejected") since there's nothing to fulfill, and <span class="kw">Promise.race([])</span> stays <b>pending forever</b>. Handlers attached to an already-settled promise still run asynchronously.` },
  
 { id:"p13", topic:"promises", diff:"hard",
-  q:"Write Promise.all from scratch (polyfill).",
-  a:`Track results by index and a completion count; resolve when all done, reject on first error:`,
+  q:"Implement Promise.all-like aggregation for a dense array.",
+  a:`Track results by index and a completion count; resolve when all done, reject on first error. This dense-array exercise is not a complete iterable-compatible polyfill:`,
   fix:`<span class="kw2">function</span> <span class="fn">allP</span>(promises) {
   <span class="kw2">return</span> <span class="kw2">new</span> <span class="fn">Promise</span>((resolve, reject) => {
     <span class="kw2">const</span> res = []; <span class="kw2">let</span> done = <span class="nm">0</span>;
@@ -1488,21 +1078,21 @@ p.<span class="fn">then</span>(() => <span class="fn">console</span>.<span class
 /* ---------------- this / call·bind·apply (15) ---------------- */
 { id:"t1", topic:"this", diff:"normal",
   q:"What is `this` at the global level, in a regular function, and in an object method?",
-  a:`<b>Global scope:</b> the global object (<span class="kw">window</span> in browsers, <span class="kw">globalThis</span> generally). <b>Regular function call:</b> <span class="kw">undefined</span> in strict mode, the global object in non-strict ("this substitution"). <b>Object method:</b> the object that called it (left of the dot). Rule: for regular functions, <span class="kw">this</span> is decided by <b>how it's called</b>, not where it's defined.` },
+  a:`<b>Browser classic-script top level (modules use undefined):</b> the global object (<span class="kw">window</span> in browsers, <span class="kw">globalThis</span> generally). <b>Regular function call:</b> <span class="kw">undefined</span> in strict mode, the global object in non-strict ("this substitution"). <b>Object method:</b> the object that called it (left of the dot). Rule: for regular functions, <span class="kw">this</span> is decided by <b>how it's called</b>, not where it's defined.` },
  
 { id:"t2", topic:"this", diff:"hard",
-  q:"Why does obj.b() return undefined?",
+  q:"In a browser classic script with no global val property, why does obj.b() return undefined?",
   setup:`<span class="kw2">const</span> obj = {
   val: <span class="nm">42</span>,
   a: <span class="kw2">function</span>() { <span class="kw2">return</span> <span class="kw2">this</span>.val; },
   b: () => <span class="kw2">this</span>.val,
 };
 <span class="fn">console</span>.<span class="fn">log</span>(obj.<span class="fn">a</span>(), obj.<span class="fn">b</span>());`,
-  a:`Prints <b>42 undefined</b>. <span class="kw">obj.a()</span> is a regular method → <span class="kw">this</span> is <span class="kw">obj</span>. <span class="kw">obj.b</span> is an <b>arrow function</b> — it has no own <span class="kw">this</span>, so it uses the lexical/global <span class="kw">this</span>, where <span class="kw">val</span> doesn't exist. Arrows are a bad choice for object methods.` },
+  a:`Prints <b>42 undefined</b>. <span class="kw">obj.a()</span> is a regular method → <span class="kw">this</span> is <span class="kw">obj</span>. <span class="kw">obj.b</span> is an <b>arrow function</b> — it has no own <span class="kw">this</span>, so it uses the lexical/global <span class="kw">this</span>, where <span class="kw">val</span> doesn't exist. Use a regular function when a method needs its call-site receiver. In a module this arrow would capture undefined, so reading this.val would throw.` },
  
 { id:"t3", topic:"this", diff:"normal",
   q:"call vs apply vs bind — what's the difference?",
-  a:`All three set <span class="kw">this</span> explicitly. <b>call(ctx, a, b)</b> invokes immediately, args listed. <b>apply(ctx, [a, b])</b> invokes immediately, args as an array. <b>bind(ctx, a)</b> does <b>not</b> invoke — it returns a <b>new function</b> with <span class="kw">this</span> (and optional preset args) permanently locked in, to call later.` },
+  a:`For ordinary unbound functions, all three let you supply <span class="kw">this</span>. They cannot replace an arrow’s lexical this. <b>call(ctx, a, b)</b> invokes immediately, args listed. <b>apply(ctx, [a, b])</b> invokes immediately, args as an array. <b>bind(ctx, a)</b> does <b>not</b> invoke — it returns a <b>new function</b> with <span class="kw">this</span> (and optional preset args) remembered for later ordinary calls. Constructor calls with new have separate receiver rules.` },
  
 { id:"t4", topic:"this", diff:"hard",
   q:"Fix the lost `this` in this callback.",
@@ -1510,7 +1100,7 @@ p.<span class="fn">then</span>(() => <span class="fn">console</span>.<span class
   name: <span class="st">"Alok"</span>,
   greetLater() {
     <span class="fn">setTimeout</span>(<span class="kw2">function</span>() {
-      <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw2">this</span>.name);  <span class="cm">// undefined ❌</span>
+      <span class="fn">console</span>.<span class="fn">log</span>(<span class="kw2">this</span>.name);  <span class="cm">// not user.name; depends on the timer host</span>
     }, <span class="nm">100</span>);
   },
 };`,
@@ -1535,15 +1125,15 @@ p.<span class="fn">then</span>(() => <span class="fn">console</span>.<span class
   setup:`<span class="kw2">const</span> obj = { x: <span class="nm">1</span>, get() { <span class="kw2">return</span> <span class="kw2">this</span>.x; } };
 <span class="kw2">const</span> fn = obj.<span class="fn">get</span>;
 <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">fn</span>());`,
-  a:`Prints <b>undefined</b> (or throws in strict mode). Detaching the method loses the <span class="kw">obj</span> binding — <span class="kw">fn()</span> is a plain function call, so <span class="kw">this</span> is <span class="kw">undefined</span>/global, not <span class="kw">obj</span>. Fix: <span class="kw">const fn = obj.get.bind(obj)</span>.` },
+  a:`In a non-strict script it reads the global x property (undefined if absent); in strict mode it throws a TypeError. Detaching the method loses the <span class="kw">obj</span> binding — <span class="kw">fn()</span> is a plain function call, so <span class="kw">this</span> is <span class="kw">undefined</span>/global, not <span class="kw">obj</span>. Fix: <span class="kw">const fn = obj.get.bind(obj)</span>.` },
  
 { id:"t7", topic:"this", diff:"normal",
   q:"How do arrow functions determine `this`?",
-  a:`Arrow functions have <b>no own <span class="kw">this</span></b>. They capture <span class="kw">this</span> <b>lexically</b> — from the scope where they're <b>defined</b>, decided at definition time, not call time. This makes them ideal for callbacks inside methods (they keep the surrounding <span class="kw">this</span>) but wrong as object methods or constructors.` },
+  a:`Arrow functions have <b>no own <span class="kw">this</span></b>. They capture <span class="kw">this</span> <b>lexically</b> — from the scope where they're <b>defined</b>, decided at definition time, not call time. This makes them ideal for callbacks inside methods (they keep the surrounding <span class="kw">this</span>) but unsuitable when a method needs a dynamic receiver. Arrows cannot be constructors.` },
  
 { id:"t8", topic:"this", diff:"hard",
-  q:"Polyfill Function.prototype.bind.",
-  a:`Return a new function that applies the original with a fixed context and merged args:`,
+  q:"Implement a simple bind-like helper for ordinary calls.",
+  a:`Return a new function that applies the original with a fixed context and merged args. This teaching implementation does not reproduce native bound-constructor or metadata behavior:`,
   fix:`<span class="fn">Function</span>.prototype.myBind = <span class="kw2">function</span>(ctx, ...preset) {
   <span class="kw2">const</span> fn = <span class="kw2">this</span>;
   <span class="kw2">return</span> <span class="kw2">function</span>(...later) {
@@ -1558,7 +1148,7 @@ p.<span class="fn">then</span>(() => <span class="fn">console</span>.<span class
   a:`With <span class="kw">new</span>, JS creates a fresh empty object and binds <span class="kw">this</span> to it, runs the constructor, and returns that object (unless the constructor returns its own object). So <span class="kw">this</span> is the <b>new instance</b> — <span class="kw">p.name === "Ada"</span>. This is why arrow functions can't be constructors: they have no own <span class="kw">this</span>.` },
  
 { id:"t10", topic:"this", diff:"hard",
-  q:"Predict the output — arrow inside a regular method with forEach.",
+  q:"Predict the output — regular forEach callback in a non-strict browser script with no global tag property.",
   setup:`<span class="kw2">const</span> obj = {
   vals: [<span class="nm">1</span>, <span class="nm">2</span>],
   tag: <span class="st">"X"</span>,
@@ -1741,6 +1331,9 @@ users.<span class="fn">reduce</span>((acc, u) => {
 ];
  
 </script>
+<script src="study-guides.js"></script>
+<script src="season2-guides.js"></script>
+<script src="lesson-visuals.js"></script>
 <script>
 /* ============================================================
    Namaste JavaScript Revision Deck — app engine
@@ -1852,6 +1445,25 @@ users.<span class="fn">reduce</span>((acc, u) => {
     </div>`;
   }
  
+  function escapeText(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function renderGuide(id) {
+    const guide = STUDY_GUIDES[id];
+    const video = `https://www.youtube.com/watch?v=${guide.video}`;
+    return `<div class="guide-intro"><a href="${video}" target="_blank" rel="noopener">Watch the lesson ↗</a>
+      <p>Run examples separately unless a block explicitly continues the previous example. Predict its output before reading the explanation. Additional variations help you apply the concept.</p></div>
+      <nav class="lesson-toc" aria-label="In this lesson"><b>In this lesson</b>${LESSON_VISUALS.locations[id] ? `<p><a href="#${id}-visual">Explore the interactive visual ↓</a></p>` : ''}<ol>${guide.sections.map((part,i) => `<li><a href="#${id}-part-${i}">${escapeText(part.title)}</a></li>`).join('')}</ol></nav>
+      ${LESSON_VISUALS.render(id)}
+      ${guide.sections.map((part,i) => `<section class="guide-section block" id="${id}-part-${i}"><h3>${escapeText(part.title)}</h3>
+        ${part.time !== null ? `<a class="video-time" href="${video}&t=${part.time}s" target="_blank" rel="noopener">Video · ${Math.floor(part.time/60)}:${String(part.time%60).padStart(2,'0')} ↗</a>` : ''}
+        ${part.body}${part.code ? renderCode({f:'example.js',c:escapeText(part.code)}) : ''}
+        ${part.output ? `<div class="expected-output"><b>Expected result</b><pre>${escapeText(part.output)}</pre></div>` : ''}</section>`).join('')}
+      <section class="recall"><h3>Check your understanding</h3><p>Explain your answer aloud, then open the explanation.</p>
+        ${guide.recall.map(([q,a]) => `<details><summary>${escapeText(q)}</summary><p>${escapeText(a)}</p></details>`).join('')}</section>
+      <p class="guide-reference">Further reading: ${(guide.references || [['MDN JavaScript Guide', 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide']]).map(([label, url]) => `<a href="${escapeText(url)}" target="_blank" rel="noopener">${escapeText(label)} ↗</a>`).join(' · ')}</p>`;
+  }
+
   /* ---------- episode page ---------- */
   function renderEpisode(ep, idx) {
     const qs = questionsForEpisode(ep);
@@ -1874,9 +1486,9 @@ users.<span class="fn">reduce</span>((acc, u) => {
       <div class="ep-head">
         <span class="tag">▪ ${ep.tag}</span>
         <h2>${ep.title}</h2>
-        <div class="tldr">${ep.tldr}</div>
+        <div class="tldr">${STUDY_GUIDES[ep.id] ? "Read the explanation, predict the output, then try the variations and recall questions." : ep.tldr}</div>
       </div>
-      ${ep.blocks.map(renderBlock).join("")}
+      ${STUDY_GUIDES[ep.id] ? renderGuide(ep.id) : ep.blocks.map(renderBlock).join("")}
       ${qsHtml}
       <button class="mark-done ${done.has(ep.id) ? "done" : ""}" data-done="${ep.id}">
         ${done.has(ep.id) ? "✓ Reviewed" : "Mark as reviewed"}</button>
@@ -1889,7 +1501,7 @@ users.<span class="fn">reduce</span>((acc, u) => {
     const lessons = CONTENT.filter(e => !e.special).length;
     return `<section class="episode visible">
       <div class="hero">
-        <div class="eyebrow">Season 1 · Season 2 · Complete Revision</div>
+        <div class="eyebrow">Season 1 · Season 2 · Study & revision</div>
         <h1>${HERO.title}</h1>
         <p>${HERO.desc}</p>
         <div class="stats">
@@ -1901,10 +1513,11 @@ users.<span class="fn">reduce</span>((acc, u) => {
       </div>
       <div class="block" style="margin-top:40px">
         <h3>How to use this deck</h3>
-        <p>Work top-to-bottom through the sidebar, or jump to any weak spot. Each section has a <b>TL;DR</b>, visual execution diagrams, annotated code, and — where it matters — <b>interview questions with reveal-answers</b>. Mark sections <b>reviewed</b> to track your progress in the top bar.</p>
+        <p><a href="https://www.youtube.com/playlist?list=PLlasXeu85E9cQ32gLCvAvr9vNaUccPVNP" target="_blank" rel="noopener">Season 1 playlist ↗</a> · <a href="https://www.youtube.com/playlist?list=PLlasXeu85E9eWOpw9jxHOQyGMRiBZ60aX" target="_blank" rel="noopener">Season 2 playlist ↗</a> · <a href="https://www.youtube.com/watch?v=78Homn79Qsk" target="_blank" rel="noopener">Season 2 trailer ↗</a></p>
+        <p>Work top-to-bottom through the sidebar, or jump to any weak spot. Both seasons have detailed explanations, video chapter links, worked examples, expected results, and recall exercises. The Season 2 bonus guide covers the nine JavaScript prerequisites for React. The interview questions include revealable answers. Mark sections <b>reviewed</b> to track your progress in the top bar.</p>
         <ul>
           <li><b>Season 1</b> builds the mental model: execution context, hoisting, scope, closures, the event loop, and functional methods.</li>
-          <li><b>Season 2</b> is all async: callback hell, promises, async/await, promise APIs, and the <span class="kw">this</span> keyword.</li>
+          <li><b>Season 2</b> covers callback hell, promises, async/await, promise APIs, and the <span class="kw">this</span> keyword.</li>
           <li>The <b>${QUESTIONS.length} interview questions</b> live in the <b>Question Bank</b> (⚡ in the sidebar): <b>15 each</b> for Closures, Event Loop, Promises &amp; async/await, <span class="kw">this</span>/call·bind·apply, and map/filter/reduce. The same sets also appear under their teaching episodes.</li>
         </ul>
       </div>
@@ -2054,7 +1667,7 @@ users.<span class="fn">reduce</span>((acc, u) => {
  
   /* ---------- keyboard nav ---------- */
   document.addEventListener("keydown", (e) => {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (e.target.closest("input, textarea, select, button, [data-visual]")) return;
     const ids = ["home", ...CONTENT.map(c => c.id)];
     const i = ids.indexOf(current);
     if (e.key === "ArrowRight" && i < ids.length - 1) go(ids[i + 1]);
