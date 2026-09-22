@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="lesson-visuals.css">
+<link rel="stylesheet" href="definitions.css">
 <style>
 :root{
   /* ---- Warm light (default) ---- */
@@ -1334,6 +1335,7 @@ users.<span class="fn">reduce</span>((acc, u) => {
 <script src="study-guides.js"></script>
 <script src="season2-guides.js"></script>
 <script src="lesson-visuals.js"></script>
+<script src="definitions.js"></script>
 <script>
 /* ============================================================
    Namaste JavaScript Revision Deck — app engine
@@ -1453,7 +1455,8 @@ users.<span class="fn">reduce</span>((acc, u) => {
     const video = `https://www.youtube.com/watch?v=${guide.video}`;
     return `<div class="guide-intro"><a href="${video}" target="_blank" rel="noopener">Watch the lesson ↗</a>
       <p>Run examples separately unless a block explicitly continues the previous example. Predict its output before reading the explanation. Additional variations help you apply the concept.</p></div>
-      <nav class="lesson-toc" aria-label="In this lesson"><b>In this lesson</b>${LESSON_VISUALS.locations[id] ? `<p><a href="#${id}-visual">Explore the interactive visual ↓</a></p>` : ''}<ol>${guide.sections.map((part,i) => `<li><a href="#${id}-part-${i}">${escapeText(part.title)}</a></li>`).join('')}</ol></nav>
+      <nav class="lesson-toc" aria-label="In this lesson"><b>In this lesson</b>${LESSON_DEFINITIONS.has(id) ? `<p><a href="#${id}-definitions">Interview definitions ↓</a></p>` : ''}${LESSON_VISUALS.locations[id] ? `<p><a href="#${id}-visual">Explore the interactive visual ↓</a></p>` : ''}<ol>${guide.sections.map((part,i) => `<li><a href="#${id}-part-${i}">${escapeText(part.title)}</a></li>`).join('')}</ol></nav>
+      ${LESSON_DEFINITIONS.render(id)}
       ${LESSON_VISUALS.render(id)}
       ${guide.sections.map((part,i) => `<section class="guide-section block" id="${id}-part-${i}"><h3>${escapeText(part.title)}</h3>
         ${part.time !== null ? `<a class="video-time" href="${video}&t=${part.time}s" target="_blank" rel="noopener">Video · ${Math.floor(part.time/60)}:${String(part.time%60).padStart(2,'0')} ↗</a>` : ''}
@@ -1508,7 +1511,7 @@ users.<span class="fn">reduce</span>((acc, u) => {
           <div class="stat"><div class="n">${CONTENT.length}</div><div class="l">Sections</div></div>
           <div class="stat"><div class="n">${lessons}</div><div class="l">Core Lessons</div></div>
           <div class="stat"><div class="n">${QUESTIONS.length}</div><div class="l">Interview Qs</div></div>
-          <div class="stat"><div class="n">${TOPICS.length}×15</div><div class="l">Per Topic</div></div>
+          <div class="stat"><div class="n">${LESSON_DEFINITIONS.count()}</div><div class="l">Definitions</div></div>
         </div>
       </div>
       <div class="block" style="margin-top:40px">
@@ -1518,6 +1521,7 @@ users.<span class="fn">reduce</span>((acc, u) => {
         <ul>
           <li><b>Season 1</b> builds the mental model: execution context, hoisting, scope, closures, the event loop, and functional methods.</li>
           <li><b>Season 2</b> covers callback hell, promises, async/await, promise APIs, and the <span class="kw">this</span> keyword.</li>
+          <li>Every lesson opens with <b>interview definitions</b>: the sentence to say first, a worked example with its real output, and the follow-ups that usually come next. All ${LESSON_DEFINITIONS.count()} of them are searchable in the <b>Glossary</b> (§ in the sidebar).</li>
           <li>The <b>${QUESTIONS.length} interview questions</b> live in the <b>Question Bank</b> (⚡ in the sidebar): <b>15 each</b> for Closures, Event Loop, Promises &amp; async/await, <span class="kw">this</span>/call·bind·apply, and map/filter/reduce. The same sets also appear under their teaching episodes.</li>
         </ul>
       </div>
@@ -1569,6 +1573,13 @@ users.<span class="fn">reduce</span>((acc, u) => {
     </section>`;
   }
  
+  /* ---------- glossary ---------- */
+  let glossaryQuery = "";
+  const titleFor = id => (CONTENT.find(ep => ep.id === id) || {}).title || id;
+  function renderGlossary() {
+    return LESSON_DEFINITIONS.renderGlossary(glossaryQuery, titleFor);
+  }
+
   /* ---------- navigation ---------- */
   function buildNav() {
     let html = `<div class="nav-group"><button class="nav-item" data-go="home">
@@ -1576,7 +1587,10 @@ users.<span class="fn">reduce</span>((acc, u) => {
       <span>Overview</span></button>
       <button class="nav-item" data-go="bank">
       <span class="ep-num" style="border-color:var(--green);color:var(--green)">⚡</span>
-      <span>Question Bank</span><span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-faint)">${QUESTIONS.length}</span></button></div>`;
+      <span>Question Bank</span><span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-faint)">${QUESTIONS.length}</span></button>
+      <button class="nav-item" data-go="glossary">
+      <span class="ep-num" style="border-color:var(--purple);color:var(--purple)">§</span>
+      <span>Glossary</span><span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-faint)">${LESSON_DEFINITIONS.count()}</span></button></div>`;
     let lastGroup = null;
     CONTENT.forEach(ep => {
       if (ep.group !== lastGroup) {
@@ -1617,6 +1631,8 @@ users.<span class="fn">reduce</span>((acc, u) => {
       main.innerHTML = renderHome();
     } else if (id === "bank") {
       main.innerHTML = renderBank();
+    } else if (id === "glossary") {
+      main.innerHTML = renderGlossary();
     } else {
       const idx = CONTENT.findIndex(e => e.id === id);
       main.innerHTML = renderEpisode(CONTENT[idx], idx);
@@ -1659,6 +1675,16 @@ users.<span class="fn">reduce</span>((acc, u) => {
     }
   });
  
+  /* ---------- glossary search ---------- */
+  document.addEventListener("input", (e) => {
+    if (e.target.id !== "glossaryQuery") return;
+    glossaryQuery = e.target.value;
+    const caret = e.target.selectionStart;
+    main.innerHTML = renderGlossary();
+    const field = document.getElementById("glossaryQuery");
+    if (field) { field.focus(); field.setSelectionRange(caret, caret); }
+  });
+
   /* ---------- mobile sidebar ---------- */
   function openSidebar() { sidebar.classList.add("open"); overlay.classList.add("show"); }
   function closeSidebar() { sidebar.classList.remove("open"); overlay.classList.remove("show"); }
